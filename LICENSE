@@ -5,6 +5,7 @@
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
+<<<<<<< HEAD
                             Preamble
 
   The GNU General Public License is a free, copyleft license for
@@ -672,3 +673,8 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
+=======
+                            [ full license text below is abbreviated for space reasons in UI ]
+
+You can get the full version at: https://www.gnu.org/licenses/gpl-3.0.txt
+>>>>>>> 42b60a7 (Initial commit)

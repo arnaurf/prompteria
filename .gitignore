@@ -1,0 +1,32 @@
+# Python
+# Python compilation files
+__pycache__/
+*.pyc
+*.pyo
+
+# Packages and distributions
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+
+# Other common virtual environment names
+# If you use a different name, uncomment the line
+# .venv/
+# env/
+# .env/
+
+# IDEs and code editors
+# Ignore files and folders for common editors
+.vscode/
+.idea/
+.history/
+
+# macOS
+# Ignore macOS metadata file
+.DS_Store
+
+# Ignore pdf files
+*.pdf
