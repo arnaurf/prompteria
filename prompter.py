@@ -158,7 +158,7 @@ def main():
             print(f"  - {missing}")
         sys.exit(1)
 
-    zathura = pdfManager(pdf_files)
+    zathura = pdfManager(pdf_files, pdf_folder)
 
     print("Attaching MIDI input callback handler.")
     midi_in.set_callback(MidiInputHandler(port_name, midi_through, channel, zathura))
