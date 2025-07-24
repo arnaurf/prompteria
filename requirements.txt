@@ -1,2 +1,2 @@
-rtmidi
-pydbus
+python-rtmidi==1.5.8
+pydbus==0.6.0

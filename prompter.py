@@ -34,11 +34,11 @@ class pdfManager():
     dbus = None
     zathura_ps = None
     dirname = os.path.dirname(__file__)
-    pdf_folder = os.path.join(dirname, "pdf")
     current_pdf = 1
     pdf_files = {}
 
-    def __init__(self, pdf_files):
+    def __init__(self, pdf_files, pdf_folder):
+        self.pdf_folder = pdf_folder
         self.start_zathura(pdf_files)
 
     def start_zathura(self, pdf_files):
@@ -148,9 +148,10 @@ def main():
 
     # Convert keys to int
     pdf_files = {int(k): v for k, v in raw_pdf_files.items()}
+    pdf_folder = os.path.join(dirname, "pdf")
 
     # Check PDF
-    missing_files = [f"{key}: {path}" for key, path in pdf_files.items() if not os.path.exists(path)]
+    missing_files = [f"{key}: {path}" for key, subpath in pdf_files.items() if not os.path.exists(os.path.join(pdf_folder, subpath))]
     if missing_files:
         print("ERROR: The following PDF's doesn't exist:")
         for missing in missing_files:
