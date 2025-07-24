@@ -33,7 +33,6 @@ JSON_PATH = args.input
 class pdfManager():
     dbus = None
     zathura_ps = None
-    dirname = os.path.dirname(__file__)
     current_pdf = 1
     pdf_files = {}
 
@@ -128,6 +127,8 @@ def list_midi_ports():
 
 def main():
     """Main: Find, listen the MIDI device and react when a signal is received"""
+    dirname = os.path.dirname(__file__)
+    pdf_folder = os.path.join(dirname, "pdf")
     midi_in = rtmidi.MidiIn()
     midi_through = rtmidi.MidiOut()
     available_ports = list_midi_ports()
@@ -148,7 +149,6 @@ def main():
 
     # Convert keys to int
     pdf_files = {int(k): v for k, v in raw_pdf_files.items()}
-    pdf_folder = os.path.join(dirname, "pdf")
 
     # Check PDF
     missing_files = [f"{key}: {path}" for key, subpath in pdf_files.items() if not os.path.exists(os.path.join(pdf_folder, subpath))]
