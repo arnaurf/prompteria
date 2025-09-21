@@ -33,12 +33,11 @@ pip install rtmidi pydbus
 ### System Packages
 
 - **zathura**: A lightweight PDF viewer with D-Bus support.
-- **xdotool**: A command-line tool to simulate keyboard input.
 
 Install them on Debian/Ubuntu-based systems (including Raspberry Pi OS):
 
 ```bash
-sudo apt-get install zathura xdotool
+sudo apt-get install zathura
 ```
 
 ---
@@ -69,13 +68,13 @@ Place all your PDF files inside a folder named `pdf` in the same directory as th
 Launch the script from the terminal:
 
 ```bash
-python prompter-dbus.py
+python prompteria.py
 ```
 
 or
 
 ```bash
-python prompter-dbus.py -i '/home/mark/prompter/setlists/setlist_1.json'
+python prompteria.py -i '/home/mark/prompter/setlists/setlist_1.json'
 ```
 
 You will see a list of available MIDI ports. Select the one corresponding to your MIDI device.
