@@ -34,6 +34,7 @@ class pdfManager():
     dbus = None
     zathura_ps = None
     current_pdf = 1
+    current_page = 0
     pdf_files = {}
 
     def __init__(self, pdf_files, pdf_folder):
@@ -51,7 +52,8 @@ class pdfManager():
                 service_name = name
                 break
         self.dbus = dbus.get(service_name, "/org/pwmt/zathura")
-        self.dbus.GotoPage(0) # --page=1 on zathura does not always works, lets make sure the pdf is at page 0
+        self.current_page = 0
+        self.dbus.GotoPage(self.current_page) # --page=1 on zathura does not always works, lets make sure the pdf is at page 0
 
     def __del__(self):
         pass
@@ -72,13 +74,18 @@ class pdfManager():
 
         # Open the new PDF with Zathura
         try:
-            self.dbus.OpenDocument(file_path, "", 0)
+            self.current_page = 0
+            self.dbus.OpenDocument(file_path, "", self.current_page)
         except Exception as e:
             print(f"Error opening dbus: {e}")
             raise
 
         #Wait to make sure Zathura has started
         time.sleep(0.1)
+
+    def turn_page(self):
+        self.current_page += 1
+        self.dbus.GotoPage(self.current_page)
 
 class MidiInputHandler(object):
     def __init__(self, port, midi_through, channel, pdf_manager):
@@ -106,11 +113,9 @@ class MidiInputHandler(object):
             note_number = message[1]  # Second byte contains the note numnber.
             if note_number == NEXT_PAGE:
                 print("INFO: C3 Note (48) received.")
-                handle_note_on()
+                self.pdf_manager.turn_page()
 
-def handle_note_on():
-    print("Next page")
-    os.system('xdotool key space')
+
 
 def list_midi_ports():
     """List all available MIDI devices"""
