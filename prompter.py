@@ -54,12 +54,10 @@ class pdfManager():
                 except Exception as e:
                     print(f"Error when removing sessions {f}: {e}")
 
-        if os.path.exists(history_path):
-            for f in os.listdir(history_path):
-                try:
-                    os.remove(os.path.join(history_path, f))
-                except Exception as e:
-                    print(f"Error when removing history {f}: {e}")
+            try:
+                os.remove(os.path.join(history_path, f))
+            except Exception as e:
+                print(f"Error when removing history {f}: {e}")
 
     def start_zathura(self, pdf_files):
         self.clear_zathura_sessions()
