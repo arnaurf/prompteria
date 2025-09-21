@@ -43,7 +43,7 @@ def list_midi_ports():
         print("No MIDI ports detected")
 
 
-def setup_midi(pdf_manager):
+def setup_midi(pdf_manager, queue):
     """Setup the MIDI device for i/o"""
     midi_in = rtmidi.MidiIn()
     midi_out = rtmidi.MidiOut()
@@ -58,7 +58,7 @@ def setup_midi(pdf_manager):
     midi_out.open_port(int(port_name) - 1)
     print(f"Listening to port {available_ports[int(port_name) - 1]}")
 
-    midi_in.set_callback(MidiInputHandler(port_name, midi_out, pdf_manager))
+    midi_in.set_callback(MidiInputHandler(port_name, midi_out, pdf_manager, queue))
     return midi_in, midi_out
 
 
@@ -82,7 +82,7 @@ def main():
     # Listen keyboard and MIDI device and add tasks to queue
     zathura = pdfManager(pdf_files, pdf_folder)
     action_queue = queue.Queue()
-    setup_midi(zathura, action_queue)
+    midi_in, midi_out = setup_midi(zathura, action_queue)
     keyboardInputHandler(zathura, action_queue)
 
     # MAIN LOOP // Process and perform tasks from queue

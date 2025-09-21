@@ -34,7 +34,7 @@ class MidiInputHandler:
         self._wallclock = time.time()
         self.midi_through = midi_through
         self.pdf_manager = pdf_manager
-        self.channel = CHANNEL
+        self.channel = CHANNEL - 1 # Start idx=0
         self.action_queue = queue
 
     def __call__(self, event, data=None):
@@ -44,19 +44,19 @@ class MidiInputHandler:
         message, deltatime = event
         self._wallclock += deltatime
         self.midi_through.send_message(message)
-        print("[%s] @%0.6f %r" % (self.port, self._wallclock, message))
+        print("[%s] @%0.3f %r" % (self.port, self._wallclock, message))
 
-        tipo_mensaje = message[0] & 0xF0
-        canal_mensaje = message[0] & 0x0F  
+        message_type = message[0] & 0xF0
+        message_channel = message[0] & 0x0F  
 
         # Program Change: open PDF
-        if tipo_mensaje == 0xC0 and canal_mensaje == self.channel:
+        if message_type == 0xC0 and message_channel == self.channel:
             program_number = message[1]
             print(f"Program Change received: Program {program_number}")
             self.action_queue.put(lambda: self.pdf_manager.open_pdf(program_number))
 
         # Note On: next page
-        elif tipo_mensaje == 0x90 and canal_mensaje == self.channel:
+        elif message_type == 0x90 and message_channel == self.channel:
             note_number = message[1]
             if note_number == NEXT_PAGE:
                 print("INFO: C3 Note (48) received.")
