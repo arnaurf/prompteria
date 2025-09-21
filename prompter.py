@@ -41,7 +41,28 @@ class pdfManager():
         self.pdf_folder = pdf_folder
         self.start_zathura(pdf_files)
 
+    def clear_zathura_sessions(self):
+        """Remove previous sessions and configs"""
+        home = os.path.expanduser("~")
+        sessions_path = os.path.join(home, ".local", "share", "zathura", "sessions")
+        history_path = os.path.join(home, ".local", "share", "zathura", "history")
+
+        if os.path.exists(sessions_path):
+            for f in os.listdir(sessions_path):
+                try:
+                    os.remove(os.path.join(sessions_path, f))
+                except Exception as e:
+                    print(f"Error when removing sessions {f}: {e}")
+
+        if os.path.exists(history_path):
+            for f in os.listdir(history_path):
+                try:
+                    os.remove(os.path.join(history_path, f))
+                except Exception as e:
+                    print(f"Error when removing history {f}: {e}")
+
     def start_zathura(self, pdf_files):
+        self.clear_zathura_sessions()
         self.pdf_files = pdf_files
         self.zathura_ps = subprocess.Popen(['zathura', f"{self.pdf_folder}/{self.pdf_files[self.current_pdf]}", '--mode=presentation', '--page=1'])
         time.sleep(4)
