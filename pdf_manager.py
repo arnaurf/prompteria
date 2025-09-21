@@ -116,9 +116,10 @@ class pdfManager:
         """
         Go to the next page.
         """
-        self.current_page = self.dbus.pagenumber + 1
+        
         if self.dbus:
             try:
+                self.current_page = self.dbus.pagenumber + 1
                 self.dbus.GotoPage(self.current_page)
             except Exception as e:
                 print(f"Error turning page: {e}")
