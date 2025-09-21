@@ -3,7 +3,7 @@ import threading
 
 NEXT_PAGE = 48  # MIDI note for "next page" (C3)
 CHANNEL = 1     # Default MIDI channel
-
+DEBUG = False
 
 def keyboardInputHandler(pdf_manager, action_queue):
     """
@@ -44,7 +44,8 @@ class MidiInputHandler:
         message, deltatime = event
         self._wallclock += deltatime
         self.midi_through.send_message(message)
-        print("[%s] @%0.3f %r" % (self.port, self._wallclock, message))
+        if DEBUG:
+            print("[%s] @%0.3f %r" % (self.port, self._wallclock, message))
 
         message_type = message[0] & 0xF0
         message_channel = message[0] & 0x0F  
