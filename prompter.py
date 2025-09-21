@@ -106,9 +106,21 @@ class pdfManager():
         #Wait to make sure Zathura has started
         time.sleep(0.1)
 
+    def close(self):
+        try:
+            if self.zathura_ps:
+                self.zathura_ps.terminate()
+                self.zathura_ps.wait()
+        except Exception as e:
+            print(f"Error closing Zathura: {e}")
+
     def turn_page(self):
         self.current_page += 1
-        self.dbus.GotoPage(self.current_page)
+        if self.dbus:
+            try:
+                self.dbus.GotoPage(self.current_page)
+            except Exception as e:
+                print(f"Error turning page: {e}")
 
 class MidiInputHandler(object):
     def __init__(self, port, midi_through, channel, pdf_manager):
