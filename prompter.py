@@ -55,7 +55,7 @@ class pdfManager():
                     print(f"Error when removing sessions {f}: {e}")
 
             try:
-                os.remove(os.path.join(history_path, f))
+                os.remove(history_path)
             except Exception as e:
                 print(f"Error when removing history {f}: {e}")
 
