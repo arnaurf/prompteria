@@ -16,6 +16,8 @@ import sys
 import time
 import json
 import argparse
+import threading
+import queue
 from pydbus import SessionBus
 
 NEXT_PAGE = 48 # C3
@@ -30,17 +32,39 @@ parser.add_argument(
 args = parser.parse_args()
 JSON_PATH = args.input
 
+action_queue = queue.Queue()
+
 class pdfManager():
     dbus = None
     zathura_ps = None
     current_pdf = 1
+    current_page = 0
     pdf_files = {}
 
     def __init__(self, pdf_files, pdf_folder):
         self.pdf_folder = pdf_folder
         self.start_zathura(pdf_files)
 
+    def clear_zathura_sessions(self):
+        """Remove previous sessions and configs"""
+        home = os.path.expanduser("~")
+        sessions_path = os.path.join(home, ".local", "share", "zathura", "sessions")
+        history_path = os.path.join(home, ".local", "share", "zathura", "history")
+
+        if os.path.exists(sessions_path):
+            for f in os.listdir(sessions_path):
+                try:
+                    os.remove(os.path.join(sessions_path, f))
+                except Exception as e:
+                    print(f"Error when removing sessions {f}: {e}")
+
+        try:
+            os.remove(history_path)
+        except Exception as e:
+            print(f"Error when removing history {f}: {e}")
+
     def start_zathura(self, pdf_files):
+        self.clear_zathura_sessions()
         self.pdf_files = pdf_files
         self.zathura_ps = subprocess.Popen(['zathura', f"{self.pdf_folder}/{self.pdf_files[self.current_pdf]}", '--mode=presentation', '--page=1'])
         time.sleep(4)
@@ -51,7 +75,8 @@ class pdfManager():
                 service_name = name
                 break
         self.dbus = dbus.get(service_name, "/org/pwmt/zathura")
-        self.dbus.GotoPage(0) # --page=1 on zathura does not always works, lets make sure the pdf is at page 0
+        self.current_page = 0
+        self.dbus.GotoPage(self.current_page) # --page=1 on zathura does not always works, lets make sure the pdf is at page 0
 
     def __del__(self):
         pass
@@ -72,13 +97,18 @@ class pdfManager():
 
         # Open the new PDF with Zathura
         try:
-            self.dbus.OpenDocument(file_path, "", 0)
+            self.current_page = 0
+            self.dbus.OpenDocument(file_path, "", self.current_page)
         except Exception as e:
             print(f"Error opening dbus: {e}")
             raise
 
         #Wait to make sure Zathura has started
         time.sleep(0.1)
+
+    def turn_page(self):
+        self.current_page += 1
+        self.dbus.GotoPage(self.current_page)
 
 class MidiInputHandler(object):
     def __init__(self, port, midi_through, channel, pdf_manager):
@@ -100,17 +130,14 @@ class MidiInputHandler(object):
         if tipo_mensaje == 0xC0 and canal_mensaje == self.channel:  # Program Change message (0xC0 a 0xCF)
            program_number = message[1]  # Second byte contains the Program Number
            print(f"Program Change received: Program {program_number}")
-           self.pdf_manager.open_pdf(program_number)
+           action_queue.put(lambda: self.pdf_manager.open_pdf(program_number))
 
         elif tipo_mensaje == 0x90 and canal_mensaje == self.channel:  # Note Off message (0x90 a 0x9F)
             note_number = message[1]  # Second byte contains the note numnber.
             if note_number == NEXT_PAGE:
                 print("INFO: C3 Note (48) received.")
-                handle_note_on()
+                action_queue.put(lambda: self.pdf_manager.turn_page())
 
-def handle_note_on():
-    print("Next page")
-    os.system('xdotool key space')
 
 def list_midi_ports():
     """List all available MIDI devices"""
@@ -124,6 +151,15 @@ def list_midi_ports():
         return available_ports
     else:
         print("No MIDI ports detected")
+
+def input_thread(pdf_manager):
+    while True:
+        cmd = input("Introduce PDF o 'exit': ")
+        if cmd == "exit":
+            action_queue.put(lambda: exit())
+        elif cmd.isdigit():
+            n = int(cmd)
+            action_queue.put(lambda pdf_manager=pdf_manager, num=n: pdf_manager.open_pdf(num))
 
 def main():
     """Main: Find, listen the MIDI device and react when a signal is received"""
@@ -163,15 +199,16 @@ def main():
     print("Attaching MIDI input callback handler.")
     midi_in.set_callback(MidiInputHandler(port_name, midi_through, channel, zathura))
 
+    threading.Thread(target=input_thread, args=(zathura), daemon=True).start()
+
+    # MAIN LOOP // Process MIDI and Keyboard orders
     try:
         # Manually open a PDF or wait for MIDI signals.
         while True:
-            command = input("Introduce the PDF number or 'exit' to end the session: ")
-            if command == 'exit':
-                break
-            elif command.isdigit() and int(command) in zathura.pdf_files:
-                print(zathura.pdf_files.get(int(command)))
-                zathura.open_pdf(int(command))
+            while not action_queue.empty():
+                action = action_queue.get()
+                action()  # se ejecuta todo en el hilo principal
+            time.sleep(0.01)
     except KeyboardInterrupt:
         print("The show has ended!")
         zathura.close()
