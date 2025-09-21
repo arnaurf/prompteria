@@ -58,7 +58,6 @@ def setup_midi(pdf_manager, queue):
     midi_out.open_port(int(port_name) - 1)
     print(f"Listening to port {available_ports[int(port_name) - 1]}")
 
-    midi_in.set_callback(MidiInputHandler(port_name, midi_out, pdf_manager, queue))
     return midi_in, midi_out
 
 

@@ -12,7 +12,7 @@ class pdfManager:
     dbus = None
     zathura_ps = None
     current_pdf = 1
-    current_page = 0
+    current_page = 1
     pdf_files = {}
 
     def __init__(self, pdf_files, pdf_folder):
@@ -65,7 +65,7 @@ class pdfManager:
                 break
 
         self.dbus = dbus.get(service_name, "/org/pwmt/zathura")
-        self.current_page = 0
+        self.current_page = 1
         self.dbus.GotoPage(self.current_page)  # Ensure page=0
 
     def __del__(self):
@@ -116,7 +116,7 @@ class pdfManager:
         """
         Go to the next page.
         """
-        self.current_page += 1
+        self.current_page = self.dbus.pagenumber + 1
         if self.dbus:
             try:
                 self.dbus.GotoPage(self.current_page)
