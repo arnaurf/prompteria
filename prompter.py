@@ -199,7 +199,7 @@ def main():
     print("Attaching MIDI input callback handler.")
     midi_in.set_callback(MidiInputHandler(port_name, midi_through, channel, zathura))
 
-    threading.Thread(target=input_thread, args=(zathura), daemon=True).start()
+    threading.Thread(target=input_thread, args=(zathura,), daemon=True).start()
 
     # MAIN LOOP // Process MIDI and Keyboard orders
     try:
